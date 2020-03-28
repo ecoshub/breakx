@@ -1,4 +1,4 @@
-package debugx
+package breakx
 
 import (
 	"runtime/debug"
