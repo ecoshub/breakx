@@ -1,4 +1,4 @@
-package debugx
+package breakx
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ var (
 	enable  bool           = true
 )
 
-func BreakEvery(num int, args ...interface{}) {
+func PointEvery(num int, args ...interface{}) {
 	if !enable {
 		return
 	}
@@ -26,21 +26,21 @@ func BreakEvery(num int, args ...interface{}) {
 		counter[name] = 0
 		counter[name]++
 		if num == 1 {
-			fmt.Printf("# line:%v\tfunc:%v <Breakpoint>\n", lineNumber, funcName)
+			fmt.Printf("# line:%v\tfunc:%v\t<Breakpoint>\n", lineNumber, funcName)
 			fmt.Printf("  count: %v of %v\n", counter[name], mod[name])
 		}
 	} else {
 		counter[name]++
 		if counter[name]%mod[name] == 0 {
 			if len(args) == 0 {
-				fmt.Printf("# line:%v\tfunc:%v <Breakpoint>\n", lineNumber, funcName)
+				fmt.Printf("# line:%v\tfunc:%v\t<Breakpoint>\n", lineNumber, funcName)
 				fmt.Printf("  count: %v of %v\n", counter[name], mod[name])
 				return
 			}
-			fmt.Printf("# line:%v\tfunc:%v <Breakpoint>", lineNumber, funcName)
+			fmt.Printf("# line:%v\tfunc:%v\t<Breakpoint>", lineNumber, funcName)
 			fmt.Printf("\n  count: %v of %v", counter[name], mod[name])
 			for _, arg := range args {
-				fmt.Printf("\n\t[%T]:[%v]", arg, arg)
+				fmt.Printf("\n  [%T]:[%v]", arg, arg)
 			}
 			fmt.Println()
 		}
@@ -48,39 +48,39 @@ func BreakEvery(num int, args ...interface{}) {
 }
 
 // BreakEqual creates a breakpoint if first equal second.
-func BreakEqual(first, second interface{}, args ...interface{}) {
+func PointEqual(first, second interface{}, args ...interface{}) {
 	if !enable || !reflect.DeepEqual(first, second) {
 		return
 	}
 	funcName, lineNumber := getLine()
 	if len(args) == 0 {
-		fmt.Printf("# line:%v\tfunc:%v <Breakpoint>\n", lineNumber, funcName)
+		fmt.Printf("# line:%v\tfunc:%v\t<Breakpoint>\n", lineNumber, funcName)
 		fmt.Printf("  codition: %v = %v\n", first, second)
 		return
 	}
-	fmt.Printf("# line:%v\tfunc:%v <Breakpoint>", lineNumber, funcName)
+	fmt.Printf("# line:%v\tfunc:%v\t<Breakpoint>", lineNumber, funcName)
 	fmt.Printf("\n  codition: %v = %v", first, second)
 	for _, arg := range args {
-		fmt.Printf("\n\t[%T]:[%v]", arg, arg)
+		fmt.Printf("\n  [%T]:[%v]", arg, arg)
 	}
 	fmt.Println()
 }
 
 // BreakNotEqual creates a breakpoint if first not equal second.
-func BreakNotEqual(first, second interface{}, args ...interface{}) {
+func PointNotEqual(first, second interface{}, args ...interface{}) {
 	if !enable || reflect.DeepEqual(first, second) {
 		return
 	}
 	funcName, lineNumber := getLine()
 	if len(args) == 0 {
-		fmt.Printf("# line:%v\tfunc:%v <Breakpoint>\n", lineNumber, funcName)
+		fmt.Printf("# line:%v\tfunc:%v\t<Breakpoint>\n", lineNumber, funcName)
 		fmt.Printf("  codition: %v != %v\n", first, second)
 		return
 	}
-	fmt.Printf("# line:%v\tfunc:%v <Breakpoint>", lineNumber, funcName)
+	fmt.Printf("# line:%v\tfunc:%v\t<Breakpoint>", lineNumber, funcName)
 	fmt.Printf("\n  codition: %v != %v", first, second)
 	for _, arg := range args {
-		fmt.Printf("\n\t[%T]:[%v]", arg, arg)
+		fmt.Printf("\n  [%T]:[%v]", arg, arg)
 	}
 	fmt.Println()
 }
@@ -89,18 +89,18 @@ func BreakNotEqual(first, second interface{}, args ...interface{}) {
 // and prints its call line
 // if takes any argument prints their type and values each
 // with a separate line.
-func Break(args ...interface{}) {
+func Point(args ...interface{}) {
 	if !enable {
 		return
 	}
 	funcName, lineNumber := getLine()
 	if len(args) == 0 {
-		fmt.Printf("# line:%v\tfunc:%v <Breakpoint>\n", lineNumber, funcName)
+		fmt.Printf("# line:%v\tfunc:%v\t<Breakpoint>\n", lineNumber, funcName)
 		return
 	}
-	fmt.Printf("# line:%v\tfunc:%v <Breakpoint>", lineNumber, funcName)
+	fmt.Printf("# line:%v\tfunc:%v\t<Breakpoint>", lineNumber, funcName)
 	for _, arg := range args {
-		fmt.Printf("\n\t[%T]:[%v]", arg, arg)
+		fmt.Printf("\n  [%T]:[%v]", arg, arg)
 	}
 	fmt.Println()
 }
