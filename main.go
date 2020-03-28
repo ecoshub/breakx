@@ -15,34 +15,27 @@ func PointEvery(num int, args ...interface{}) {
 	if !enable {
 		return
 	}
-	if num <= 0 {
-		fmt.Println("mod must greater than zero")
-		return
-	}
 	funcName, lineNumber := getLine()
 	name := funcName + lineNumber
-	if mod[name] == 0 {
+	if num <= 0 && mod[name] != -1 {
+		fmt.Printf("* line:%v breakx.PointEvery() function is wrong. number must greater then 0\n", lineNumber)
+		mod[name] = -1
+		return
+	}
+	switch mod[name] {
+	case -1:
+		return
+	case 0:
 		mod[name] = num
 		counter[name] = 0
 		counter[name]++
 		if num == 1 {
-			fmt.Printf("# line:%v\tfunc:%v\t<Breakpoint>\n", lineNumber, funcName)
-			fmt.Printf("  count: %v of %v\n", counter[name], mod[name])
+			printCore(false, funcName, lineNumber, "count", "of", counter[name], mod[name], args...)
 		}
-	} else {
+	default:
 		counter[name]++
 		if counter[name]%mod[name] == 0 {
-			if len(args) == 0 {
-				fmt.Printf("# line:%v\tfunc:%v\t<Breakpoint>\n", lineNumber, funcName)
-				fmt.Printf("  count: %v of %v\n", counter[name], mod[name])
-				return
-			}
-			fmt.Printf("# line:%v\tfunc:%v\t<Breakpoint>", lineNumber, funcName)
-			fmt.Printf("\n  count: %v of %v", counter[name], mod[name])
-			for _, arg := range args {
-				fmt.Printf("\n  [%T]:[%v]", arg, arg)
-			}
-			fmt.Println()
+			printCore(false, funcName, lineNumber, "count", "of", counter[name], mod[name], args...)
 		}
 	}
 }
@@ -53,17 +46,7 @@ func PointEqual(first, second interface{}, args ...interface{}) {
 		return
 	}
 	funcName, lineNumber := getLine()
-	if len(args) == 0 {
-		fmt.Printf("# line:%v\tfunc:%v\t<Breakpoint>\n", lineNumber, funcName)
-		fmt.Printf("  codition: %v = %v\n", first, second)
-		return
-	}
-	fmt.Printf("# line:%v\tfunc:%v\t<Breakpoint>", lineNumber, funcName)
-	fmt.Printf("\n  codition: %v = %v", first, second)
-	for _, arg := range args {
-		fmt.Printf("\n  [%T]:[%v]", arg, arg)
-	}
-	fmt.Println()
+	printCore(false, funcName, lineNumber, "codition", "=", first, second, args...)
 }
 
 // BreakNotEqual creates a breakpoint if first not equal second.
@@ -72,17 +55,7 @@ func PointNotEqual(first, second interface{}, args ...interface{}) {
 		return
 	}
 	funcName, lineNumber := getLine()
-	if len(args) == 0 {
-		fmt.Printf("# line:%v\tfunc:%v\t<Breakpoint>\n", lineNumber, funcName)
-		fmt.Printf("  codition: %v != %v\n", first, second)
-		return
-	}
-	fmt.Printf("# line:%v\tfunc:%v\t<Breakpoint>", lineNumber, funcName)
-	fmt.Printf("\n  codition: %v != %v", first, second)
-	for _, arg := range args {
-		fmt.Printf("\n  [%T]:[%v]", arg, arg)
-	}
-	fmt.Println()
+	printCore(false, funcName, lineNumber, "codition", "!=", first, second, args...)
 }
 
 // Break creates a breakpoint
@@ -94,15 +67,7 @@ func Point(args ...interface{}) {
 		return
 	}
 	funcName, lineNumber := getLine()
-	if len(args) == 0 {
-		fmt.Printf("# line:%v\tfunc:%v\t<Breakpoint>\n", lineNumber, funcName)
-		return
-	}
-	fmt.Printf("# line:%v\tfunc:%v\t<Breakpoint>", lineNumber, funcName)
-	for _, arg := range args {
-		fmt.Printf("\n  [%T]:[%v]", arg, arg)
-	}
-	fmt.Println()
+	printCore(true, funcName, lineNumber, "", "", nil, nil, args...)
 }
 
 // Printif prints the value of arguments if values not nil or empty string.
@@ -135,4 +100,22 @@ func Enable() {
 // Disable disables prints.
 func Disable() {
 	enable = false
+}
+
+func printCore(nocond bool, funcName, lineNumber, condname, cond string, first, second interface{}, args ...interface{}) {
+	if len(args) == 0 {
+		fmt.Printf("# line:%v\tfunc:%v\t<Breakpoint>\n", lineNumber, funcName)
+		if !nocond {
+			fmt.Printf("  %v: %v %v %v\n", condname, first, cond, second)
+		}
+		return
+	}
+	fmt.Printf("# line:%v\tfunc:%v\t<Breakpoint>", lineNumber, funcName)
+	if !nocond {
+		fmt.Printf("\n  %v: %v %v %v", condname, first, cond, second)
+	}
+	for _, arg := range args {
+		fmt.Printf("\n  [%T]:[%v]", arg, arg)
+	}
+	fmt.Println()
 }
