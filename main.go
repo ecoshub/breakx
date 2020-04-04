@@ -15,7 +15,7 @@ func PointEvery(num int, args ...interface{}) {
 	if !enable {
 		return
 	}
-	funcName, lineNumber := getLine()
+	funcName, fileName, lineNumber := getLine()
 	name := funcName + lineNumber
 	if num <= 0 && mod[name] != -1 {
 		fmt.Printf("* line:%v breakx.PointEvery() function is wrong. number must greater then 0\n", lineNumber)
@@ -30,12 +30,12 @@ func PointEvery(num int, args ...interface{}) {
 		counter[name] = 0
 		counter[name]++
 		if num == 1 {
-			printCore(false, funcName, lineNumber, "count", "of", counter[name], mod[name], args...)
+			printCore(false, funcName, fileName, lineNumber, "count", "of", counter[name], mod[name], args...)
 		}
 	default:
 		counter[name]++
 		if counter[name]%mod[name] == 0 {
-			printCore(false, funcName, lineNumber, "count", "of", counter[name], mod[name], args...)
+			printCore(false, funcName, fileName, lineNumber, "count", "of", counter[name], mod[name], args...)
 		}
 	}
 }
@@ -45,8 +45,8 @@ func PointEqual(first, second interface{}, args ...interface{}) {
 	if !enable || !reflect.DeepEqual(first, second) {
 		return
 	}
-	funcName, lineNumber := getLine()
-	printCore(false, funcName, lineNumber, "codition", "=", first, second, args...)
+	funcName, fileName, lineNumber := getLine()
+	printCore(false, funcName, fileName, lineNumber, "codition", "=", first, second, args...)
 }
 
 // BreakNotEqual creates a breakpoint if first not equal second.
@@ -54,8 +54,8 @@ func PointNotEqual(first, second interface{}, args ...interface{}) {
 	if !enable || reflect.DeepEqual(first, second) {
 		return
 	}
-	funcName, lineNumber := getLine()
-	printCore(false, funcName, lineNumber, "codition", "!=", first, second, args...)
+	funcName, fileName, lineNumber := getLine()
+	printCore(false, funcName, fileName, lineNumber, "codition", "!=", first, second, args...)
 }
 
 // Break creates a breakpoint
@@ -66,8 +66,8 @@ func Point(args ...interface{}) {
 	if !enable {
 		return
 	}
-	funcName, lineNumber := getLine()
-	printCore(true, funcName, lineNumber, "", "", nil, nil, args...)
+	funcName, fileName, lineNumber := getLine()
+	printCore(true, funcName, fileName, lineNumber, "", "", nil, nil, args...)
 }
 
 // Printif prints the value of arguments if values not nil or empty string.
@@ -102,15 +102,15 @@ func Disable() {
 	enable = false
 }
 
-func printCore(nocond bool, funcName, lineNumber, condname, cond string, first, second interface{}, args ...interface{}) {
+func printCore(nocond bool, funcName, fileName, lineNumber, condname, cond string, first, second interface{}, args ...interface{}) {
 	if len(args) == 0 {
-		fmt.Printf("# line:%v\tfunc:%v\t<Breakpoint>\n", lineNumber, funcName)
+		fmt.Printf("# line:%v\tfile:%v\tfunc:%v\t<Breakpoint>\n", lineNumber, fileName, funcName)
 		if !nocond {
 			fmt.Printf("  %v: %v %v %v\n", condname, first, cond, second)
 		}
 		return
 	}
-	fmt.Printf("# line:%v\tfunc:%v\t<Breakpoint>", lineNumber, funcName)
+	fmt.Printf("# line:%v\tfile:%v\tfunc:%v\t<Breakpoint>", lineNumber, fileName, funcName)
 	if !nocond {
 		fmt.Printf("\n  %v: %v %v %v", condname, first, cond, second)
 	}

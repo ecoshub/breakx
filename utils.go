@@ -5,11 +5,14 @@ import (
 	"strings"
 )
 
-func getLine() (string, string) {
+func getLine() (string, string, string) {
 	var (
 		stackString       string
+		line              string
+		file              string
 		stackNumber       int = 6
-		offset            int
+		lineOffset        int
+		fileOffset        int
 		stackStringLength int
 	)
 	stackString = string(debug.Stack())
@@ -23,11 +26,25 @@ func getLine() (string, string) {
 	stackString = tokens[0]
 	stackStringLength = len(stackString)
 	for i := 0; i < stackStringLength; i++ {
-		// column char is 58
-		if stackString[stackStringLength-i-1] == 58 {
-			offset = stackStringLength - i - 1
+		curr := stackString[stackStringLength-i-1]
+		// 58 is this :
+		if curr == 58 {
+			lineOffset = stackStringLength - i - 1
+		}
+		// 47 is this /
+		if curr == 47 {
+			fileOffset = stackStringLength - i - 1
 			break
 		}
 	}
-	return funcLine, stackString[offset+1:]
+	line = stackString[lineOffset+1:]
+	file = stackString[fileOffset+1 : lineOffset]
+	for i := 0; i < len(funcLine); i++ {
+		// this 40 is (
+		if funcLine[i] == 40 {
+			funcLine = funcLine[:i]
+		}
+	}
+	funcLine += "()"
+	return funcLine, file, line
 }
