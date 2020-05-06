@@ -6,10 +6,12 @@ import (
 )
 
 var (
-	counter map[string]int = make(map[string]int, 1)
-	mod     map[string]int = make(map[string]int, 1)
+	counter map[string]int = make(map[string]int, 0)
+	mod     map[string]int = make(map[string]int, 0)
 	enable  bool           = true
 )
+
+func Nop(_ ...interface{}) {}
 
 func PointEvery(num int, args ...interface{}) {
 	if !enable {
