@@ -11,8 +11,7 @@ var (
 	enable  bool           = true
 )
 
-func Nop(_ ...interface{}) {}
-
+//PointEvery creates a break point every 'num' time
 func PointEvery(num int, args ...interface{}) {
 	if !enable {
 		return
@@ -42,7 +41,7 @@ func PointEvery(num int, args ...interface{}) {
 	}
 }
 
-// BreakEqual creates a breakpoint if first equal second.
+// PointEqual creates a breakpoint if first equal second.
 func PointEqual(first, second interface{}, args ...interface{}) {
 	if !enable || !reflect.DeepEqual(first, second) {
 		return
@@ -51,7 +50,7 @@ func PointEqual(first, second interface{}, args ...interface{}) {
 	printCore(false, funcName, fileName, lineNumber, "codition", "=", first, second, args...)
 }
 
-// BreakNotEqual creates a breakpoint if first not equal second.
+// PointNotEqual creates a breakpoint if first not equal second.
 func PointNotEqual(first, second interface{}, args ...interface{}) {
 	if !enable || reflect.DeepEqual(first, second) {
 		return
@@ -60,7 +59,7 @@ func PointNotEqual(first, second interface{}, args ...interface{}) {
 	printCore(false, funcName, fileName, lineNumber, "codition", "!=", first, second, args...)
 }
 
-// Break creates a breakpoint
+// Point creates a breakpoint
 // and prints its call line
 // if takes any argument prints their type and values each
 // with a separate line.
@@ -70,6 +69,26 @@ func Point(args ...interface{}) {
 	}
 	funcName, fileName, lineNumber := getLine()
 	printCore(true, funcName, fileName, lineNumber, "", "", nil, nil, args...)
+}
+
+// Pointif prints the value of arguments if values not nil or empty string.
+func Pointif(inters ...interface{}) {
+	if !enable {
+		return
+	}
+	hasVal := false
+	// str := ""
+	for _, inter := range inters {
+		stringValue := fmt.Sprint(inter)
+		if stringValue != "" && stringValue != "<nil>" {
+			hasVal = true
+			break
+		}
+	}
+	if hasVal {
+		funcName, fileName, lineNumber := getLine()
+		printCore(true, funcName, fileName, lineNumber, "", "", nil, nil)
+	}
 }
 
 // Printif prints the value of arguments if values not nil or empty string.
@@ -94,16 +113,6 @@ func Printif(inters ...interface{}) {
 	fmt.Print(str)
 }
 
-// Enable enables prints.
-func Enable() {
-	enable = true
-}
-
-// Disable disables prints.
-func Disable() {
-	enable = false
-}
-
 func printCore(nocond bool, funcName, fileName, lineNumber, condname, cond string, first, second interface{}, args ...interface{}) {
 	if len(args) == 0 {
 		fmt.Printf("# line:%v\tfile:%v\tfunc:%v\t<Breakpoint>\n", lineNumber, fileName, funcName)
@@ -121,3 +130,21 @@ func printCore(nocond bool, funcName, fileName, lineNumber, condname, cond strin
 	}
 	fmt.Println()
 }
+
+// Enable enables prints.
+func Enable() {
+	enable = true
+}
+
+// Disable disables prints.
+func Disable() {
+	enable = false
+}
+
+// PrintStatus returns print status Enable/Disable
+func PrintStatus() bool {
+	return enable
+}
+
+//Nop for skipping some value
+func Nop(_ ...interface{}) {}
