@@ -71,6 +71,15 @@ func Point(args ...interface{}) {
 	printCore(true, funcName, fileName, lineNumber, "", "", nil, nil, args...)
 }
 
+// Spoint creates a breakpoint
+// and returns a string its call line
+// if takes any argument prints their type and values each
+// with a separate line.
+func Spoint(args ...interface{}) string {
+	funcName, fileName, lineNumber := getLine()
+	return sprintCore(true, funcName, fileName, lineNumber, "", "", nil, nil, args...)
+}
+
 // Pointif prints the value of arguments if values not nil or empty string.
 func Pointif(inters ...interface{}) {
 	if !enable {
@@ -114,21 +123,48 @@ func Printif(inters ...interface{}) {
 }
 
 func printCore(nocond bool, funcName, fileName, lineNumber, condname, cond string, first, second interface{}, args ...interface{}) {
+	str := ""
 	if len(args) == 0 {
+		str += fmt.Sprintf("# line:%v\tfile:%v\tfunc:%v\t<Breakpoint>\n", lineNumber, fileName, funcName)
 		fmt.Printf("# line:%v\tfile:%v\tfunc:%v\t<Breakpoint>\n", lineNumber, fileName, funcName)
 		if !nocond {
+			str += fmt.Sprintf("  %v: %v %v %v\n", condname, first, cond, second)
 			fmt.Printf("  %v: %v %v %v\n", condname, first, cond, second)
 		}
 		return
 	}
+	str += fmt.Sprintf("# line:%v\tfile:%v\tfunc:%v\t<Breakpoint>", lineNumber, fileName, funcName)
 	fmt.Printf("# line:%v\tfile:%v\tfunc:%v\t<Breakpoint>", lineNumber, fileName, funcName)
 	if !nocond {
+		str += fmt.Sprintf("\n  %v: %v %v %v", condname, first, cond, second)
 		fmt.Printf("\n  %v: %v %v %v", condname, first, cond, second)
 	}
 	for _, arg := range args {
+		str += fmt.Sprintf("\n  [%T]:[%v]", arg, arg)
 		fmt.Printf("\n  [%T]:[%v]", arg, arg)
 	}
+	str += "\n"
 	fmt.Println()
+}
+
+func sprintCore(nocond bool, funcName, fileName, lineNumber, condname, cond string, first, second interface{}, args ...interface{}) string {
+	str := ""
+	if len(args) == 0 {
+		str += fmt.Sprintf("# line:%v\tfile:%v\tfunc:%v\t<Breakpoint>\n", lineNumber, fileName, funcName)
+		if !nocond {
+			str += fmt.Sprintf("  %v: %v %v %v\n", condname, first, cond, second)
+		}
+		return str
+	}
+	str += fmt.Sprintf("# line:%v\tfile:%v\tfunc:%v\t<Breakpoint>", lineNumber, fileName, funcName)
+	if !nocond {
+		str += fmt.Sprintf("\n  %v: %v %v %v", condname, first, cond, second)
+	}
+	for _, arg := range args {
+		str += fmt.Sprintf("\n  [%T]:[%v]", arg, arg)
+	}
+	str += "\n"
+	return str
 }
 
 // Enable enables prints.
