@@ -3,6 +3,7 @@ package breakx
 import (
 	"fmt"
 	"reflect"
+	"strconv"
 )
 
 var (
@@ -10,6 +11,20 @@ var (
 	mod     map[string]int = make(map[string]int, 0)
 	enable  bool           = true
 )
+
+// PointInfo it holds all informations of point
+type PointInfo struct {
+	LineNumber   int
+	FileName     string
+	FunctionName string
+}
+
+// PointStruct returns a PointInfo structs that holds points all informations
+func PointStruct() PointInfo {
+	funcName, fileName, lineNumberString := getLine()
+	lineNumber, _ := strconv.Atoi(lineNumberString)
+	return PointInfo{LineNumber: lineNumber, FileName: fileName, FunctionName: funcName}
+}
 
 //PointEvery creates a break point every 'num' time
 func PointEvery(num int, args ...interface{}) {
