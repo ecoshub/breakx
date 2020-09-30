@@ -2,9 +2,9 @@
 
 #### Breakx is a Simple Print Base Debugging Tool
 
-For clarify the package name. Its not breaking anything, Its designed for print based debugging.
+It creates a virtual breakpoint that can act like a traditional breakpoint unless it prints the line number,function name and filename instead.
 
-Four major functions below with examples.
+Major Functions are below.
 
 ---
 #### Add a Breakpoints with `breakx.Point()`
