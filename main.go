@@ -1,77 +1,34 @@
 package breakx
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"strconv"
+	"time"
 )
 
 var (
-	counter map[string]int = make(map[string]int, 0)
-	mod     map[string]int = make(map[string]int, 0)
-	enable  bool           = true
+	errCondition error = errors.New("Break Error: comparisson functions needs two argument")
 )
 
-// PointInfo it holds all informations of point
+var (
+	enable            bool   = true
+	defaultTimeFormat string = "2006-01-02 15:04:05"
+)
+
+// PointInfo it holds all information of Point struct
 type PointInfo struct {
 	LineNumber   int
 	FileName     string
 	FunctionName string
 }
 
-// PointStruct returns a PointInfo structs that holds points all informations
-func PointStruct() PointInfo {
+// PointStruct return PointInfo object that hold all the information of a 'Break Point'
+func PointStruct() *PointInfo {
 	funcName, fileName, lineNumberString := getLine()
 	lineNumber, _ := strconv.Atoi(lineNumberString)
-	return PointInfo{LineNumber: lineNumber, FileName: fileName, FunctionName: funcName}
-}
-
-//PointEvery creates a break point every 'num' time
-func PointEvery(num int, args ...interface{}) {
-	if !enable {
-		return
-	}
-	funcName, fileName, lineNumber := getLine()
-	name := funcName + lineNumber
-	if num <= 0 && mod[name] != -1 {
-		fmt.Printf("* line:%v breakx.PointEvery() function is wrong. number must greater then 0\n", lineNumber)
-		mod[name] = -1
-		return
-	}
-	switch mod[name] {
-	case -1:
-		return
-	case 0:
-		mod[name] = num
-		counter[name] = 0
-		counter[name]++
-		if num == 1 {
-			printCore(false, funcName, fileName, lineNumber, "count", "of", counter[name], mod[name], args...)
-		}
-	default:
-		counter[name]++
-		if counter[name]%mod[name] == 0 {
-			printCore(false, funcName, fileName, lineNumber, "count", "of", counter[name], mod[name], args...)
-		}
-	}
-}
-
-// PointEqual creates a breakpoint if first equal second.
-func PointEqual(first, second interface{}, args ...interface{}) {
-	if !enable || !reflect.DeepEqual(first, second) {
-		return
-	}
-	funcName, fileName, lineNumber := getLine()
-	printCore(false, funcName, fileName, lineNumber, "codition", "=", first, second, args...)
-}
-
-// PointNotEqual creates a breakpoint if first not equal second.
-func PointNotEqual(first, second interface{}, args ...interface{}) {
-	if !enable || reflect.DeepEqual(first, second) {
-		return
-	}
-	funcName, fileName, lineNumber := getLine()
-	printCore(false, funcName, fileName, lineNumber, "codition", "!=", first, second, args...)
+	return &PointInfo{LineNumber: lineNumber, FileName: fileName, FunctionName: funcName}
 }
 
 // Point creates a breakpoint
@@ -82,8 +39,20 @@ func Point(args ...interface{}) {
 	if !enable {
 		return
 	}
-	funcName, fileName, lineNumber := getLine()
-	printCore(true, funcName, fileName, lineNumber, "", "", nil, nil, args...)
+	content := printCoreBrief("", args...)
+	print(content)
+}
+
+// Pointd creates a detailed breakpoint
+// and prints its call line
+// if takes any argument prints their type and values each
+// with a separate line.
+func Pointd(args ...interface{}) {
+	if !enable {
+		return
+	}
+	content := printCoreDetailed("", args...)
+	print(content)
 }
 
 // Spoint creates a breakpoint
@@ -91,8 +60,7 @@ func Point(args ...interface{}) {
 // if takes any argument prints their type and values each
 // with a separate line.
 func Spoint(args ...interface{}) string {
-	funcName, fileName, lineNumber := getLine()
-	return sprintCore(true, funcName, fileName, lineNumber, "", "", nil, nil, args...)
+	return printCoreDetailed("", args...)
 }
 
 // Pointif prints the value of arguments if values not nil or empty string.
@@ -101,7 +69,6 @@ func Pointif(inters ...interface{}) {
 		return
 	}
 	hasVal := false
-	// str := ""
 	for _, inter := range inters {
 		stringValue := fmt.Sprint(inter)
 		if stringValue != "" && stringValue != "<nil>" {
@@ -110,9 +77,35 @@ func Pointif(inters ...interface{}) {
 		}
 	}
 	if hasVal {
-		funcName, fileName, lineNumber := getLine()
-		printCore(true, funcName, fileName, lineNumber, "", "", nil, nil)
+		content := printCoreBrief("", false)
+		print(content)
 	}
+}
+
+// PointEqual creates a breakpoint if first equal second.
+func PointEqual(args ...interface{}) {
+	if len(args) != 2 {
+		fmt.Println(errCondition)
+		return
+	}
+	if !enable || !reflect.DeepEqual(args[0], args[1]) {
+		return
+	}
+	content := printCoreDetailed("Equal", args...)
+	print(content)
+}
+
+// PointNotEqual creates a breakpoint if first not equal second.
+func PointNotEqual(args ...interface{}) {
+	if len(args) < 2 {
+		fmt.Println(errCondition)
+		return
+	}
+	if !enable || reflect.DeepEqual(args[0], args[1]) {
+		return
+	}
+	content := printCoreDetailed("Not Equal", args...)
+	print(content)
 }
 
 // Printif prints the value of arguments if values not nil or empty string.
@@ -137,48 +130,45 @@ func Printif(inters ...interface{}) {
 	fmt.Print(str)
 }
 
-func printCore(nocond bool, funcName, fileName, lineNumber, condname, cond string, first, second interface{}, args ...interface{}) {
+func printCoreBrief(condname string, args ...interface{}) string {
+	conditionScheme := "# %v = %v\t<line:%3v>\n"
+
+	_, fileName, lineNumberString := getLine()
+	lineNumber, _ := strconv.Atoi(lineNumberString)
+	argc := getArgc(fileName, lineNumber)
+
 	str := ""
-	if len(args) == 0 {
-		str += fmt.Sprintf("# line:%v\tfile:%v\tfunc:%v\t<Breakpoint>\n", lineNumber, fileName, funcName)
-		fmt.Printf("# line:%v\tfile:%v\tfunc:%v\t<Breakpoint>\n", lineNumber, fileName, funcName)
-		if !nocond {
-			str += fmt.Sprintf("  %v: %v %v %v\n", condname, first, cond, second)
-			fmt.Printf("  %v: %v %v %v\n", condname, first, cond, second)
-		}
-		return
+	for i, arg := range args {
+		content := fmt.Sprintf(conditionScheme, argc[i], arg, lineNumberString)
+		str += content
 	}
-	str += fmt.Sprintf("# line:%v\tfile:%v\tfunc:%v\t<Breakpoint>", lineNumber, fileName, funcName)
-	fmt.Printf("# line:%v\tfile:%v\tfunc:%v\t<Breakpoint>", lineNumber, fileName, funcName)
-	if !nocond {
-		str += fmt.Sprintf("\n  %v: %v %v %v", condname, first, cond, second)
-		fmt.Printf("\n  %v: %v %v %v", condname, first, cond, second)
-	}
-	for _, arg := range args {
-		str += fmt.Sprintf("\n  [%T]:[%v]", arg, arg)
-		fmt.Printf("\n  [%T]:[%v]", arg, arg)
-	}
-	str += "\n"
-	fmt.Println()
+	return str
 }
 
-func sprintCore(nocond bool, funcName, fileName, lineNumber, condname, cond string, first, second interface{}, args ...interface{}) string {
-	str := ""
-	if len(args) == 0 {
-		str += fmt.Sprintf("# line:%v\tfile:%v\tfunc:%v\t<Breakpoint>\n", lineNumber, fileName, funcName)
-		if !nocond {
-			str += fmt.Sprintf("  %v: %v %v %v\n", condname, first, cond, second)
-		}
-		return str
+func printCoreDetailed(condname string, args ...interface{}) string {
+	scheme := "# < line: %v, func: %v, file: %v, time: %v >\n"
+	conditionHeader := "  \"%v\" condition triggered\n"
+	conditionScheme := "\t%v (%T) = %v\n"
+
+	funcName, fileName, lineNumberString := getLine()
+	lineNumber, _ := strconv.Atoi(lineNumberString)
+	argc := getArgc(fileName, lineNumber)
+
+	if condname != "" {
+		argc = argc[:len(argc)-1]
+		args = args[:len(args)-1]
 	}
-	str += fmt.Sprintf("# line:%v\tfile:%v\tfunc:%v\t<Breakpoint>", lineNumber, fileName, funcName)
-	if !nocond {
-		str += fmt.Sprintf("\n  %v: %v %v %v", condname, first, cond, second)
+
+	content := fmt.Sprintf(scheme, lineNumber, funcName, fileName, time.Now().Format(defaultTimeFormat))
+	str := content
+	if condname != "" {
+		content := fmt.Sprintf(conditionHeader, condname)
+		str += content
 	}
-	for _, arg := range args {
-		str += fmt.Sprintf("\n  [%T]:[%v]", arg, arg)
+	for i, arg := range args {
+		content := fmt.Sprintf(conditionScheme, argc[i], arg, arg)
+		str += content
 	}
-	str += "\n"
 	return str
 }
 

@@ -10,7 +10,7 @@ func getLine() (string, string, string) {
 		stackString       string
 		line              string
 		file              string
-		stackNumber       int = 6
+		stackNumber       int = 8
 		lineOffset        int
 		fileOffset        int
 		stackStringLength int
