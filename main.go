@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
-	"time"
 )
 
 var (
@@ -14,7 +13,7 @@ var (
 
 var (
 	enable            bool   = true
-	defaultTimeFormat string = "2006-01-02 15:04:05"
+	defaultTimeFormat string = "2006-01-02 15:04:05.99"
 )
 
 // PointInfo it holds all information of Point struct
@@ -39,19 +38,7 @@ func Point(args ...interface{}) {
 	if !enable {
 		return
 	}
-	content := printCoreBrief("", args...)
-	print(content)
-}
-
-// Pointd creates a detailed breakpoint
-// and prints its call line
-// if takes any argument prints their type and values each
-// with a separate line.
-func Pointd(args ...interface{}) {
-	if !enable {
-		return
-	}
-	content := printCoreDetailed("", args...)
+	content := printCore("", args...)
 	print(content)
 }
 
@@ -60,7 +47,7 @@ func Pointd(args ...interface{}) {
 // if takes any argument prints their type and values each
 // with a separate line.
 func Spoint(args ...interface{}) string {
-	return printCoreDetailed("", args...)
+	return printCore("", args...)
 }
 
 // Pointif prints the value of arguments if values not nil or empty string.
@@ -77,7 +64,7 @@ func Pointif(inters ...interface{}) {
 		}
 	}
 	if hasVal {
-		content := printCoreBrief("", false)
+		content := printCore("", false)
 		print(content)
 	}
 }
@@ -91,7 +78,7 @@ func PointEqual(args ...interface{}) {
 	if !enable || !reflect.DeepEqual(args[0], args[1]) {
 		return
 	}
-	content := printCoreDetailed("Equal", args...)
+	content := printCore("Equal", args...)
 	print(content)
 }
 
@@ -104,7 +91,7 @@ func PointNotEqual(args ...interface{}) {
 	if !enable || reflect.DeepEqual(args[0], args[1]) {
 		return
 	}
-	content := printCoreDetailed("Not Equal", args...)
+	content := printCore("Not Equal", args...)
 	print(content)
 }
 
@@ -128,48 +115,6 @@ func Printif(inters ...interface{}) {
 		str += "\n"
 	}
 	fmt.Print(str)
-}
-
-func printCoreBrief(condname string, args ...interface{}) string {
-	conditionScheme := "# %v = %v\t<line:%3v>\n"
-
-	_, fileName, lineNumberString := getLine()
-	lineNumber, _ := strconv.Atoi(lineNumberString)
-	argc := getArgc(fileName, lineNumber)
-
-	str := ""
-	for i, arg := range args {
-		content := fmt.Sprintf(conditionScheme, argc[i], arg, lineNumberString)
-		str += content
-	}
-	return str
-}
-
-func printCoreDetailed(condname string, args ...interface{}) string {
-	scheme := "# < line: %v, func: %v, file: %v, time: %v >\n"
-	conditionHeader := "  \"%v\" condition triggered\n"
-	conditionScheme := "\t%v (%T) = %v\n"
-
-	funcName, fileName, lineNumberString := getLine()
-	lineNumber, _ := strconv.Atoi(lineNumberString)
-	argc := getArgc(fileName, lineNumber)
-
-	if condname != "" {
-		argc = argc[:len(argc)-1]
-		args = args[:len(args)-1]
-	}
-
-	content := fmt.Sprintf(scheme, lineNumber, funcName, fileName, time.Now().Format(defaultTimeFormat))
-	str := content
-	if condname != "" {
-		content := fmt.Sprintf(conditionHeader, condname)
-		str += content
-	}
-	for i, arg := range args {
-		content := fmt.Sprintf(conditionScheme, argc[i], arg, arg)
-		str += content
-	}
-	return str
 }
 
 // Enable enables prints.

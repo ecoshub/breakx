@@ -1,8 +1,11 @@
 package breakx
 
 import (
+	"fmt"
 	"runtime/debug"
+	"strconv"
 	"strings"
+	"time"
 )
 
 func getLine() (string, string, string) {
@@ -45,4 +48,31 @@ func getLine() (string, string, string) {
 	index = strings.Index(funcLine, ".")
 	funcLine = funcLine[index+1:]
 	return funcLine, file, line
+}
+
+func printCore(condname string, args ...interface{}) string {
+	conditionScheme := " > %v = %v\n"
+	functionName, fileName, lineNumberString := getLine()
+	lineNumber, _ := strconv.Atoi(lineNumberString)
+	argc := getArgc(fileName, lineNumber)
+
+	headerString := "# Breakapoint @ line:%3v, func: %v, file: %v, time: %v\n"
+	header := fmt.Sprintf(headerString, lineNumber, functionName, fileName, time.Now().Format(defaultTimeFormat))
+
+	if condname != "" {
+		argc = argc[:len(argc)-1]
+		args = args[:len(args)-1]
+	}
+
+	if len(args) == 0 {
+		return header
+	}
+
+	str := ""
+	str += header
+	for i, arg := range args {
+		content := fmt.Sprintf(conditionScheme, argc[i], arg)
+		str += content
+	}
+	return str
 }
