@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"strconv"
 )
 
 var (
@@ -18,16 +17,21 @@ var (
 
 // PointInfo it holds all information of Point struct
 type PointInfo struct {
-	LineNumber   int
-	FileName     string
+	Filename     string
+	FilePath     string
 	FunctionName string
+	Line         int
 }
 
 // PointStruct return PointInfo object that hold all the information of a 'Break Point'
 func PointStruct() *PointInfo {
-	funcName, fileName, lineNumberString := getLine()
-	lineNumber, _ := strconv.Atoi(lineNumberString)
-	return &PointInfo{LineNumber: lineNumber, FileName: fileName, FunctionName: funcName}
+	path, filename, lineNumber, functionName := dummyStack()
+	return &PointInfo{
+		Line:         lineNumber,
+		Filename:     filename,
+		FilePath:     path,
+		FunctionName: functionName,
+	}
 }
 
 // Point creates a breakpoint
@@ -132,5 +136,5 @@ func PrintStatus() bool {
 	return enable
 }
 
-//Nop for skipping some value
+//Nop for skipping some variable
 func Nop(_ ...interface{}) {}

@@ -1,11 +1,31 @@
 package breakx
 
 import (
-	"fmt"
 	"io/ioutil"
-	"os"
 	"strings"
 )
+
+func getArgc(path string, lineNumber int) []string {
+	file, err := ioutil.ReadFile(path)
+	if err != nil {
+		return []string{}
+	}
+	fileString := string(file)
+	lines := strings.Split(fileString, "\n")
+	line := lines[lineNumber-1]
+	startParantesis := 0
+	for i := range line {
+		curr := line[i]
+		if curr == '(' {
+			startParantesis = i
+			break
+		}
+	}
+	line = strings.TrimSpace(line)
+	line = line[startParantesis-1:]
+	argc := parseFunctionArguments(line)
+	return argc
+}
 
 func parseFunctionArguments(args string) []string {
 	argsArray := make([]string, 0, 4)
@@ -45,34 +65,4 @@ func parseFunctionArguments(args string) []string {
 		}
 	}
 	return argsArray
-}
-
-func getArgc(fileName string, lineNumber int) []string {
-	workingDir, err := os.Getwd()
-	if err != nil {
-		fmt.Println(err)
-		return nil
-	}
-	workingDir = workingDir + "/" + fileName
-	file, err := ioutil.ReadFile(workingDir)
-	count := 0
-	lastNewLine := 0
-	newLine := 0
-	for i, chr := range file {
-		if chr == '\n' {
-			if count == lineNumber-1 {
-				newLine = i
-				break
-			} else {
-				lastNewLine = i
-			}
-			count++
-		}
-	}
-	line := string(file[lastNewLine:newLine])
-	line = strings.TrimSpace(line)
-
-	braceIndex := strings.Index(line, "(")
-	line = line[braceIndex:]
-	return parseFunctionArguments(line)
 }
