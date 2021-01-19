@@ -84,7 +84,7 @@ func main() {
 
 ```
 # Breakapoint @ line: 16, func: main(), file: main.go, time: 2021-01-18 23:57:01.36
- > control = 14
+ > control = 13
 ```
 
 ---
@@ -119,7 +119,7 @@ Get "https://g.qwe": dial tcp: lookup g.qwe: no such host
 
 ---
 
-## Return a struct that hols the break point information `breakx.PointStruct()`
+## Return a struct that holds the break point information `breakx.PointStruct()`
 
 ```go
 package main
