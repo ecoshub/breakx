@@ -13,6 +13,10 @@ func getArgc(path string, lineNumber int) []string {
 	fileString := string(file)
 	lines := strings.Split(fileString, "\n")
 	line := lines[lineNumber-1]
+	line = strings.TrimSpace(line)
+	if line == "breakx.Point()" {
+		return []string{}
+	}
 	startParantesis := 0
 	for i := range line {
 		curr := line[i]
@@ -21,7 +25,6 @@ func getArgc(path string, lineNumber int) []string {
 			break
 		}
 	}
-	line = strings.TrimSpace(line)
 	line = line[startParantesis-1:]
 	argc := parseFunctionArguments(line)
 	return argc
