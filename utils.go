@@ -25,7 +25,7 @@ func getArgc(path string, lineNumber int) []string {
 			break
 		}
 	}
-	line = line[startParantesis-1:]
+	line = line[startParantesis:]
 	argc := parseFunctionArguments(line)
 	return argc
 }
