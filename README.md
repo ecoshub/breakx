@@ -134,7 +134,7 @@ func main() {
 	point := breakx.PointStruct()
 	fmt.Println(point)
 
-  // to see field names lets see point struct as json.
+	// to see field names lets see point struct as json.
 	j, _ := json.MarshalIndent(point, "", "  ")
 	fmt.Println("point struct as json:", string(j))
 }
@@ -142,7 +142,7 @@ func main() {
 
 #### Output:
 
-```
+```json
 &{main.go /home/you/Desktop/test/main.go main() 10}
 point struct as json: {
   "Filename": "main.go",
@@ -156,8 +156,8 @@ point struct as json: {
 
 #### Other Functions
 
-## Enable or Disable all prints from breakx `breakx.Enable() / breakx.Disable()`
+-	Enable or Disable all prints from breakx **breakx.Enable() / breakx.Disable()**
 
-## Get print status is Enabled or not `breakx.PrintStatus()`
+-	Get print status is Enabled or not **breakx.PrintStatus()**
 
-## Skip to use a defined variable `breakx.Nop()`
+-	Skip to use a defined variable **breakx.Nop()**
