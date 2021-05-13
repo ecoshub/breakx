@@ -2,9 +2,10 @@
 
 It creates a virtual breakpoint that can act like a traditional breakpoint
 
-unless it can print **line number**, **current function**, **file name**, **file path**, **time** to hit the break point
+It can print **line number**, **current function**, **file name**, **file path**, **time** when hit the breakpoint instead breaking the process.
 
-and even variable **values** with variables **name**.
+İn can print given variables with thier name.
+
 
 ---
 
@@ -26,8 +27,7 @@ func main() {
 	// dummy string
 	fmt.Println("function started")
 
-	// this breakpoint can read
-	// current function name, line, file name, file path and variable names that given
+	// this breakpoint can get current line number, function name, file etc. and prints it.
 	breakx.Point()
 
 	// dummy string
@@ -47,9 +47,9 @@ func main() {
 
 ```
 function started
-# Breakpoint @ line: 18, func: main(), file: main.go, time: 2021-01-18 23:55:13.78
+# Breakpoint @ line: 17, func: main(), file: main.go, time: 2021-01-18 23:55:13.78
 some other code print
-# Breakpoint @ line: 24, func: main(), file: main.go, time: 2021-01-18 23:55:13.78
+# Breakpoint @ line: 23, func: main(), file: main.go, time: 2021-01-18 23:55:13.78
  > name = eco
 function ended
 ```
@@ -72,8 +72,7 @@ func main() {
 	list := []int{10, 11, 12, 13, 14, 15}
 
 	for _, element := range list {
-		// when element is equal
-		// to control value it will hit the breakpoint
+		// when element is equal to control value it is going to hit the breakpoint
 		breakx.PointEqual(control, element)
 	}
 }
@@ -83,7 +82,7 @@ func main() {
 #### Output:
 
 ```
-# Breakapoint @ line: 16, func: main(), file: main.go, time: 2021-01-18 23:57:01.36
+# Breakapoint @ line: 13, func: main(), file: main.go, time: 2021-01-18 23:57:01.36
  > control = 13
 ```
 
@@ -158,6 +157,6 @@ point struct as json: {
 
 -	Enable or Disable all prints from breakx **breakx.Enable() / breakx.Disable()**
 
--	Get print status is Enabled or not **breakx.PrintStatus()**
+-	Get print status **breakx.PrintStatus()**
 
--	Skip to use a defined variable **breakx.Nop()**
+-	Skip a variable without actually using it. **breakx.Nop(<variable>)**
